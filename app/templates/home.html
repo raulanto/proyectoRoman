@@ -1,0 +1,204 @@
+{% extends 'base/body.html' %}
+
+{% block contenido %}
+    <main>
+
+        <div class="page-header pb-10 page-header-dark bg-gradient-primary-to-secondary">
+            <div class="container-fluid">
+                <div class="page-header-content">
+                    <h1 class="page-header-title">
+                        <div class="page-header-icon"><i data-feather="users"></i></div>
+                        <span>Registros Dashboard</span>
+                    </h1>
+                    <div class="page-header-subtitle">Resumen de registros de usuarios</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="container-fluid mt-n10">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="card  mb-4">
+                        <div class="card-header">Registros por Mes y Año</div>
+                        <div class="card-body">
+                            <div class="chart-area" style="position: relative; height: 300px;">
+                                <canvas id="registrationsChart" width="100%" height="140px"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+                <div class="row">
+            <div class="col-xl-3 col-md-6 mb-4">
+                <div class="card lift border-top-0 border-bottom-0 border-right-0 border-left-lg border-blue h-100">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center">
+                            <div class="flex-grow-1">
+                                <div class="small font-weight-bold text-blue mb-1">Registros (Mensuales)</div>
+                                <div class="h5">{{ current_month_count }}</div>
+                                <div class="text-xs font-weight-bold {% if is_increase %}text-success{% else %}text-danger{% endif %} d-inline-flex align-items-center">
+                                    <i class="mr-1" data-feather="{% if is_increase %}trending-up{% else %}trending-down{% endif %}"></i>
+                                    {{ percent_change|floatformat:0 }}%
+                                </div>
+                            </div>
+                            <div class="ml-2"><i class="fas fa-dollar-sign fa-2x text-gray-200"></i></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-md-6 mb-4">
+                <div class="card lift border-top-0 border-bottom-0 border-right-0 border-left-lg border-purple h-100">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center">
+                            <div class="flex-grow-1">
+                                <div class="small font-weight-bold text-purple mb-1">Total de Registros</div>
+                                <div class="h5">{{ total_registros }}</div>
+                            </div>
+                            <div class="ml-2"><i class="fas fa-tag fa-2x text-gray-200"></i></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-md-6 mb-4">
+                <div class="card lift border-top-0 border-bottom-0 border-right-0 border-left-lg border-green h-100">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center">
+                            <div class="flex-grow-1">
+                                <div class="small font-weight-bold text-green mb-1">Total Hombres</div>
+                                <div class="h5">{{ total_hombres }}</div>
+                            </div>
+                            <div class="ml-2"><i class="fas fa-mouse-pointer fa-2x text-gray-200"></i></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-md-6 mb-4">
+                <div class="card lift border-top-0 border-bottom-0 border-right-0 border-left-lg border-yellow h-100">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center">
+                            <div class="flex-grow-1">
+                                <div class="small font-weight-bold text-yellow mb-1">Total Mujeres</div>
+                                <div class="h5">{{ total_mujeres }}</div>
+                            </div>
+                            <div class="ml-2"><i class="fas fa-percentage fa-2x text-gray-200"></i></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+            <div class="card mb-4">
+                <div class="card-header">Lista de Registros</div>
+                <div class="card-body">
+                    <div class="datatable table-responsive">
+                        <table class="table table-bordered table-hover" id="dataTable" width="100%" cellspacing="0">
+                            <thead>
+                                <tr>
+                                    <th>Nombre</th>
+                                    <th>Teléfono</th>
+                                    <th>Email</th>
+                                    <th>Estado Físico</th>
+                                    <th>Estado Civil</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for registro in registros %}
+                                <tr>
+                                    <td>{{ registro.nombre }} {{ registro.apellido }}</td>
+
+                                    <td>{{ registro.telefono }}</td>
+                                    <td>{{ registro.email }}</td>
+                                    <td>
+                                        <div class="badge {% if registro.estado_fisico == 'vivo' %}badge-success{% else %}badge-danger{% endif %} badge-pill">
+                                            {{ registro.estado_fisico|capfirst }}
+                                        </div>
+                                    </td>
+                                    <td>{{ registro.estado_civil|capfirst }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+{% endblock %}
+
+{% block js %}
+<script>
+    // Registrations by month and year chart (now an area chart)
+    var ctx = document.getElementById('registrationsChart');
+    var myAreaChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: {{ registrations_labels|safe }},
+            datasets: [{
+                label: "Registros",
+                lineTension: 0.3,
+                backgroundColor: "rgba(0, 97, 242, 0.05)",
+                borderColor: "rgba(0, 97, 242, 1)",
+                pointRadius: 3,
+                pointBackgroundColor: "rgba(0, 97, 242, 1)",
+                pointBorderColor: "rgba(0, 97, 242, 1)",
+                pointHoverRadius: 3,
+                pointHoverBackgroundColor: "rgba(0, 97, 242, 1)",
+                pointHoverBorderColor: "rgba(0, 97, 242, 1)",
+                pointHitRadius: 10,
+                pointBorderWidth: 2,
+                data: {{ registrations_data|safe }},
+                fill: 'origin' // This makes it an area chart
+            }],
+        },
+        options: {
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        precision: 0
+                    }
+                }
+            },
+            plugins: {
+                title: {
+                    display: true,
+                    text: 'Registros por Mes y Año'
+                },
+                tooltip: {
+                    mode: 'index',
+                    intersect: false
+                }
+            }
+        }
+    });
+
+    // Users by estado fisico chart
+    var ctx2 = document.getElementById('estadoFisicoChart');
+    var myBarChart = new Chart(ctx2, {
+        type: 'bar',
+        data: {
+            labels: {{ estado_fisico_labels|safe }},
+            datasets: [{
+                label: "Usuarios",
+                backgroundColor: ["#4e73df", "#1cc88a", "#36b9cc"],
+                hoverBackgroundColor: ["#2e59d9", "#17a673", "#2c9faf"],
+                borderColor: "#4e73df",
+                data: {{ estado_fisico_data|safe }},
+            }],
+        },
+        options: {
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        precision: 0
+                    }
+                }
+            }
+        }
+    });
+</script>
+{% endblock %}
