@@ -1,0 +1,364 @@
+{% extends 'base/body.html' %}
+
+{% block contenido %}
+    <main>
+        <div class="page-header pb-10 page-header-dark bg-gradient-primary-to-secondary">
+            <div class="container-fluid">
+                <div class="page-header-content">
+                    <h1 class="page-header-title">
+                        <div class="page-header-icon"><i data-feather="users"></i></div>
+                        <span>Estadisticas de registro Edades</span>
+                    </h1>
+                    <div class="page-header-subtitle">Resumen de registros de usuarios por edades</div>
+                </div>
+            </div>
+        </div>
+
+    <div class="container-fluid mt-n10">
+
+    <!-- Estadísticas Resumen -->
+    <div class="row mb-4">
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card lift border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                Edad Promedio</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                {{ age_stats.avg_age|floatformat:1 }} años
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-calendar fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card lift border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                Edad Mínima</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                {{ age_stats.min_age }} años
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-arrow-down fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card lift border-left-info shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                Edad Máxima</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                {{ age_stats.max_age }} años
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-arrow-up fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card lift border-left-warning shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                Desviación Estándar</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                {{ age_stats.std_dev|floatformat:1 }} años
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-percent fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Gráficos principales -->
+    <div class="row">
+        <!-- Gráfico de grupos de edad -->
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Distribución por Grupos de Edad</h6>
+                </div>
+                <div class="card-body">
+                    <div class="chart-bar">
+                        <canvas id="ageGroupsChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Histograma de edades -->
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Histograma de Edades</h6>
+                </div>
+                <div class="card-body">
+                    <div class="chart-bar">
+                        <canvas id="ageHistogramChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Gráficos secundarios -->
+    <div class="row">
+        <!-- Boxplot de edades -->
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Distribución de Edades (Boxplot)</h6>
+                </div>
+                <div class="card-body">
+                    <div id="ageBoxplotChart"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Edad promedio por estado físico -->
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Edad Promedio por Estado Físico</h6>
+                </div>
+                <div class="card-body">
+                    <div class="chart-bar">
+                        <canvas id="avgAgePhysicalChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tablas de datos -->
+    <div class="row">
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Distribución por Grupos de Edad</h6>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>Grupo de Edad</th>
+                                    <th>Cantidad</th>
+                                    <th>Porcentaje</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for group in age_groups_table %}
+                                <tr>
+                                    <td>{{ group.age_group }}</td>
+                                    <td>{{ group.count }}</td>
+                                    <td>{{ group.count|floatformat:2 }}%</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Edad Promedio por Estado Civil</h6>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>Estado Civil</th>
+                                    <th>Edad Promedio</th>
+                                    <th>Cantidad</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in avg_age_marital_table %}
+                                <tr>
+                                    <td>{{ item.estado_civil|capfirst }}</td>
+                                    <td>{{ item.avg_age|floatformat:1 }} años</td>
+                                    <td>{{ item.count }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+    </main>
+
+
+
+{% endblock %}
+
+{% block js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+<script>
+// Gráfico de grupos de edad
+var ctx1 = document.getElementById('ageGroupsChart');
+new Chart(ctx1, {
+    type: 'bar',
+    data: {
+        labels: {{ age_groups_labels|safe }},
+        datasets: [{
+            label: 'Personas',
+            data: {{ age_groups_data|safe }},
+            backgroundColor: 'rgba(78, 115, 223, 0.8)',
+            borderColor: 'rgba(78, 115, 223, 1)',
+            borderWidth: 1
+        }]
+    },
+    options: {
+        responsive: true,
+        scales: {
+            y: {
+                beginAtZero: true,
+                ticks: {
+                    precision: 0
+                }
+            }
+        }
+    }
+});
+
+// Histograma de edades
+var ctx2 = document.getElementById('ageHistogramChart');
+new Chart(ctx2, {
+    type: 'bar',
+    data: {
+        labels: {{ age_histogram_labels|safe }},
+        datasets: [{
+            label: 'Personas',
+            data: {{ age_histogram_data|safe }},
+            backgroundColor: 'rgba(54, 185, 204, 0.8)',
+            borderColor: 'rgba(54, 185, 204, 1)',
+            borderWidth: 1
+        }]
+    },
+    options: {
+        responsive: true,
+        scales: {
+            y: {
+                beginAtZero: true,
+                ticks: {
+                    precision: 0
+                }
+            }
+        }
+    }
+});
+
+// Boxplot de edades (simulado con Chart.js)
+
+// Edad promedio por estado físico
+var ctx4 = document.getElementById('avgAgePhysicalChart');
+new Chart(ctx4, {
+    type: 'bar',
+    data: {
+        labels: {{ avg_age_physical_labels|safe }},
+        datasets: [{
+            label: 'Edad Promedio',
+            data: {{ avg_age_physical_data|safe }},
+            backgroundColor: 'rgba(28, 200, 138, 0.8)',
+            borderColor: 'rgba(28, 200, 138, 1)',
+            borderWidth: 1
+        }]
+    },
+    options: {
+        responsive: true,
+        scales: {
+            y: {
+                beginAtZero: false
+            }
+        }
+    }
+});
+
+
+var boxplotOptions = {
+    series: [{
+        type: 'boxPlot',
+        data: {{ boxplot_apex_data|safe }}
+    }],
+    chart: {
+        type: 'boxPlot',
+        height: 350,
+        toolbar: {
+            show: false
+        }
+    },
+    title: {
+        text: 'Distribución de Edades',
+        align: 'left',
+        style: {
+            fontSize: '16px',
+            fontWeight: 'bold'
+        }
+    },
+    plotOptions: {
+        boxPlot: {
+            colors: {
+                upper: '#4e73df',
+                lower: '#1cc88a'
+            }
+        }
+    },
+    tooltip: {
+        shared: false,
+        intersect: true,
+        y: {
+            formatter: function(val) {
+                return val + " años";
+            }
+        }
+    },
+    yaxis: {
+        title: {
+            text: 'Edad'
+        },
+        labels: {
+            formatter: function(val) {
+                return val + " años";
+            }
+        }
+    }
+};
+
+var boxplotChart = new ApexCharts(document.querySelector("#ageBoxplotChart"), boxplotOptions);
+boxplotChart.render();
+</script>
+{% endblock %}sss

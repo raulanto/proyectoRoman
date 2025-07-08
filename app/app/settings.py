@@ -26,19 +26,20 @@ SECRET_KEY = 'django-insecure-j+2ildka2^ir=9*p=p%3eph#n3$2fvw11io&y+be2^kte#dvo^
 DEBUG = True
 
 ALLOWED_HOSTS = []
-
-
-# Application definition
-
+LOGIN_REDIRECT_URL = "home"  # new
+LOGOUT_REDIRECT_URL = "/"  # new
 INSTALLED_APPS = [
     'jazzmin',
+    'crispy_forms',
+    'crispy_bootstrap4',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
+    'django.contrib.humanize',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'registro.apps.RegistroConfig'
+    'registro',
 ]
 
 MIDDLEWARE = [
@@ -56,11 +57,11 @@ ROOT_URLCONF = 'app.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
-                'django.template.context_processors.debug',
+
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
@@ -269,3 +270,8 @@ JAZZMIN_SETTINGS = {
     "changeform_format_overrides": {"auth.user": "collapsible", "auth.group": "vertical_tabs"},
 
 }
+
+
+CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap4"
+
+CRISPY_TEMPLATE_PACK = "bootstrap4"

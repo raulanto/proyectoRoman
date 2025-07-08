@@ -1,0 +1,385 @@
+{% extends 'base/body.html' %}
+{% load humanize %}
+
+{% block contenido %}
+    <main>
+        <div class="page-header pb-10 page-header-dark bg-gradient-primary-to-secondary">
+            <div class="container-fluid">
+                <div class="page-header-content">
+                    <h1 class="page-header-title">
+                        <div class="page-header-icon"><i data-feather="users"></i></div>
+                        <span>Poblacion Mensual y Taza de Mortalidad</span>
+                    </h1>
+                    <div class="page-header-subtitle">Resumen de registros de usuarios</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="container-fluid mt-n10">
+            <!-- Resumen Estadístico -->
+            <div class="row">
+                <!-- Total Registros -->
+                <div class="col-xl-3 col-md-6 mb-4">
+                    <div class="card border-left-primary shadow h-100 py-2">
+                        <div class="card-body">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col mr-2">
+                                    <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                        Registros Totales
+                                    </div>
+                                    <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                        {{ stats.total_registros|intcomma }}
+                                    </div>
+                                </div>
+                                <div class="col-auto">
+                                    <i class="fas fa-users fa-2x text-gray-300"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Mes más activo -->
+                <div class="col-xl-3 col-md-6 mb-4">
+                    <div class="card border-left-success shadow h-100 py-2">
+                        <div class="card-body">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col mr-2">
+                                    <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                        Mes con más registros
+                                    </div>
+                                    <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                        {% if stats.mes_activo %}
+                                            {{ stats.mes_activo.mes|date:"F Y" }} ({{ stats.mes_activo.total }})
+                                        {% else %}
+                                            N/A
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div class="col-auto">
+                                    <i class="fas fa-calendar fa-2x text-gray-300"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Estado predominante -->
+                <div class="col-xl-3 col-md-6 mb-4">
+                    <div class="card border-left-info shadow h-100 py-2">
+                        <div class="card-body">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col mr-2">
+                                    <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                        Estado Físico Predominante
+                                    </div>
+                                    <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                        {% if stats.estado_predominante %}
+                                            {{ stats.estado_predominante.estado_fisico|title }}
+                                            ({{ stats.estado_predominante.total }})
+                                        {% else %}
+                                            N/A
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div class="col-auto">
+                                    <i class="fas fa-heartbeat fa-2x text-gray-300"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tasa promedio -->
+                <div class="col-xl-3 col-md-6 mb-4">
+                    <div class="card border-left-warning shadow h-100 py-2">
+                        <div class="card-body">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col mr-2">
+                                    <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                        Edad Promedio
+                                    </div>
+                                    <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                        {% if estados_fisicos.0.avg_edad %}
+                                            {{ estados_fisicos.0.avg_edad|floatformat:1 }} años
+                                        {% else %}
+                                            N/A
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div class="col-auto">
+                                    <i class="fas fa-chart-line fa-2x text-gray-300"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="">
+                <div class="card shadow mb-4">
+                    <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                        <h6 class="m-0 font-weight-bold text-primary">Registros Mensuales</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="chart-area">
+                            <canvas id="timelineChart"></canvas>
+                        </div>
+                        <div class="mt-2 small text-muted">
+                            <i class="fas fa-info-circle"></i>Muestra la variación en el número total de registros mes a
+                            mes, permitiendo identificar patrones estacionales, tendencias de crecimiento o disminución
+                            en el tiempo.
+                        </div>
+                    </div>
+                </div>
+            </div>
+                <div class="">
+                    <div class="card shadow mb-4">
+                        <div class="card-header py-3">
+                            <h6 class="m-0 font-weight-bold text-primary">Tasa de Cambio Mensual</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="chart-bar">
+                                <canvas id="tasaCambioChart"></canvas>
+                            </div>
+                                                    <div class="mt-2 small text-muted">
+                            <i class="fas fa-info-circle"></i>Visualiza el porcentaje de variación entre meses consecutivos, indicando periodos de crecimiento acelerado (barras verdes) o disminución (barras rojas) en nuevos registros.
+                        </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="">
+                    <div class="card shadow mb-4">
+                        <div class="card-header py-3">
+                            <h6 class="m-0 font-weight-bold text-primary">Evolución de Estados Físicos</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="chart-line">
+                                <canvas id="evolucionEstadosChart"></canvas>
+                            </div>
+                            <div class="mt-2 small text-muted">
+                                <i class="fas fa-info-circle"></i> Muestra la evolución mensual de cada estado físico.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            <!-- Gráfico Serie Temporal -->
+            <div class="row">
+                <div class="card shadow mb-4 col-lg-8 mb-4">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-primary">Detalle por Estado Físico</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-bordered" width="100%" cellspacing="0">
+                                <thead>
+                                <tr>
+                                    <th>Estado Físico</th>
+                                    <th>Total</th>
+                                    <th>% del Total</th>
+                                    <th>Edad Promedio</th>
+                                    <th>Último Mes</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {% for estado in estados_fisicos %}
+                                    <tr>
+                                        <td>{{ estado.estado_fisico|title }}</td>
+                                        <td>{{ estado.total }}</td>
+                                        <td>{{ estado.total|floatformat:2 }}%</td>
+                                        <td>{{ estado.avg_edad|floatformat:1 }} años</td>
+                                        <td>
+                                            {% with ultimo_mes=estado.ultimo_mes %}
+                                                {% if ultimo_mes %}
+                                                    {{ ultimo_mes.total }} ({{ ultimo_mes.mes|date:"M Y" }})
+                                                {% else %}
+                                                    N/A
+                                                {% endif %}
+                                            {% endwith %}
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Distribución Estados Físicos -->
+                <div class="col-lg-4 mb-4">
+                    <div class="card shadow mb-4">
+                        <div class="card-header py-3">
+                            <h6 class="m-0 font-weight-bold text-primary">Distribución por Estado Físico</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="chart-pie pt-4 pb-2">
+                                <canvas id="estadoFisicoChart"></canvas>
+                            </div>
+                            <div class="mt-4 text-center small">
+                                {% for estado in estados_fisicos|slice:":3" %}
+                                    <span class="mr-2">
+                            <i class="fas fa-circle" style="color: {{ estado.color }}"></i>
+                            {{ estado.estado_fisico|title }}
+                        </span>
+                                {% endfor %}
+                            </div>
+                            <div class="mt-2 small text-muted">
+                                <i class="fas fa-info-circle"></i>Representa la proporción actual de registros según su estado físico, destacando visualmente los porcentajes de cada categoría mediante segmentos de colores diferenciados.
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+            <!-- Tabla Detallada -->
+
+
+        </div>
+    </main>
+
+{% endblock %}
+
+{% block js %}
+    {{ timeline_labels|json_script:"timeline-labels" }}
+    {{ timeline_data|json_script:"timeline-data" }}
+    {{ estado_fisico_data|json_script:"estado-fisico-data" }}
+    {{ tasa_cambio_data|json_script:"tasa-cambio-data" }}
+    {#{{ evolucion_data_json|json_script:"evolucion-data" }}#}
+    {{ evolucion_data|json_script:"evolucion-data" }}
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // 1. Gráfico de Serie Temporal (se mantiene igual, usa datos preprocesados)
+        const timelineCtx = document.getElementById('timelineChart');
+        new Chart(timelineCtx, {
+            type: 'line',
+            data: {
+                labels: JSON.parse(document.getElementById('timeline-labels').textContent),
+                datasets: [{
+                    label: "Registros Mensuales",
+                    lineTension: 0.3,
+                    backgroundColor: "rgba(78, 115, 223, 0.05)",
+                    borderColor: "rgba(78, 115, 223, 1)",
+                    pointRadius: 3,
+                    pointBackgroundColor: "rgba(78, 115, 223, 1)",
+                    pointBorderColor: "rgba(78, 115, 223, 1)",
+                    pointHoverRadius: 5,
+                    pointHoverBackgroundColor: "rgba(78, 115, 223, 1)",
+                    pointHitRadius: 10,
+                    pointBorderWidth: 2,
+                    data: JSON.parse(document.getElementById('timeline-data').textContent),
+                    fill: 'start'
+                }]
+            },
+            options: {
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            precision: 0
+                        }
+                    }
+                }
+            }
+        });
+
+        // 2. Gráfico de Estado Físico (modificado)
+        const estadoFisicoData = JSON.parse(document.getElementById('estado-fisico-data').textContent);
+        const estadoFisicoCtx = document.getElementById('estadoFisicoChart');
+        new Chart(estadoFisicoCtx, {
+            type: 'doughnut',
+            data: {
+                labels: estadoFisicoData.labels,
+                datasets: [{
+                    data: estadoFisicoData.values,
+                    backgroundColor: estadoFisicoData.colors,
+                    hoverBorderColor: "rgba(234, 236, 244, 1)",
+                }]
+            },
+            options: {
+                maintainAspectRatio: false,
+                cutout: '70%',
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                }
+            }
+        });
+
+        // 3. Gráfico de Tasa de Cambio (modificado)
+        const tasaCambioData = JSON.parse(document.getElementById('tasa-cambio-data').textContent);
+        const tasaCambioCtx = document.getElementById('tasaCambioChart');
+        new Chart(tasaCambioCtx, {
+            type: 'bar',
+            data: {
+                labels: tasaCambioData.labels,
+                datasets: [{
+                    label: "Tasa de Cambio (%)",
+                    backgroundColor: "rgba(97,204,54,0.7)",
+                    borderColor: "rgba(54, 185, 204, 1)",
+                    data: tasaCambioData.values,
+                }]
+            },
+            options: {
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: false
+                    }
+                }
+            }
+        });
+
+        // Obtén los datos del elemento json_script
+        const evolucionData = JSON.parse(document.getElementById('evolucion-data').textContent);
+
+        // Verifica la estructura de los datos en la consola
+        console.log('Datos para el gráfico:', evolucionData);
+
+        document.addEventListener('DOMContentLoaded', function () {
+            // Verificar la estructura de los datos
+            console.log('Datos para el gráfico:', evolucionData);
+
+            const ctx = document.getElementById('evolucionEstadosChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'line',
+                data: evolucionData,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                precision: 0
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        },
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false
+                        }
+                    },
+                    interaction: {
+                        mode: 'nearest',
+                        axis: 'x',
+                        intersect: false
+                    }
+                }
+            });
+        });
+
+        // Función para exportar gráficos (se mantiene igual)
+        function exportChart(chartId) {
+            const chartCanvas = document.getElementById(chartId);
+            const link = document.createElement('a');
+            link.download = `${chartId}.png`;
+            link.href = chartCanvas.toDataURL('image/png');
+            link.click();
+        }
+    </script>
+{% endblock %}

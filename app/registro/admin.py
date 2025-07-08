@@ -9,16 +9,21 @@ from .models import Registro, Pais, Estado, Ciudad
 # Define the admin class
 @admin.register(Registro)
 class AuthorAdmin(admin.ModelAdmin):
-    list_display = ('nombre', 'apellido', 'email', 'telefono')
+    list_display = ('nombre', 'apellido', 'email', 'telefono_celular','fecha_ingreso','ciudad')
     list_filter = ('apellido', 'ciudad', 'estado_fisico')
-    list_editable = ('apellido', 'email', 'telefono')
+    list_editable = ('apellido', 'email', 'telefono_celular')
     fieldsets = (
         ("Datos Personales", {
             'fields': (
-            'nombre', 'apellido', 'email', 'telefono', 'curp', 'fecha_nacimiento', 'edad', 'sexo', 'estado_fisico')
+            'nombre', 'apellido', 'email', 'telefono_celular', 'curp', 'fecha_nacimiento', 'edad', 'sexo', 'estado_fisico','usuario_registro')
         }),
         ("Situacion fiscal", {
             'fields': ('rfc', 'regimen')
+        }),
+        ("Expediente clinico",{
+            'fields':(
+                'tipo_sangre','alergias','alergias_descrp','enfermedad','enfermedad_descrp'
+            )
         }),
         ("Direccion", {
             'fields': ('colonia', 'calle', 'numero', 'cp', 'ciudad')
