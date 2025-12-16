@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Registro, Pais, Estado, Ciudad
+from .models import Registro, Pais, Estado, Ciudad,Alergia, Enfermedade
 
 
 # Register your models here.
@@ -48,3 +48,5 @@ class AuthorAdmin(admin.ModelAdmin):
 admin.site.register(Estado)
 admin.site.register(Ciudad)
 admin.site.register(Pais)
+admin.site.register(Alergia)
+admin.site.register(Enfermedade)

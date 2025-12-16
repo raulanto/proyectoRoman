@@ -107,8 +107,8 @@ class Registro(models.Model):
     )
 
     # Datos Situsacion Fiscial
-    rfc = models.CharField(max_length=9, null=True, blank=True)
-    curp = models.CharField(max_length=100, null=True, blank=True)
+    rfc = models.CharField(max_length=13, null=True, blank=True)
+    curp = models.CharField(max_length=18, null=True, blank=True)
     # a que regimen pertenece
     regimen = models.CharField(max_length=100,choices=REGIMEN, null=True, blank=True)
 
